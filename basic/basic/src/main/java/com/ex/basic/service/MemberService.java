@@ -1,6 +1,8 @@
 package com.ex.basic.service;
 
+import com.ex.basic.dto.LoginDto;
 import com.ex.basic.dto.MemberDto;
+import com.ex.basic.exception.InvalidLoginException;
 import com.ex.basic.exception.MemberDuplicateException;
 import com.ex.basic.exception.MemberNotFoundException;
 import com.ex.basic.repository.MemberRepository;
@@ -50,6 +52,14 @@ public class MemberService { // 예외처리도 함
         boolean result = memberRepository.save(memberDto);
         if (!result)
             throw new MemberDuplicateException("insert Faild : Id Already Exist");
+        return result;
+    }
+
+    // login
+    public boolean login(LoginDto loginDto) {
+        boolean result = memberRepository.login(loginDto);
+        if (!result)
+            throw new InvalidLoginException("Login Failed : username이 없거나 username password 불일치");
         return result;
     }
 }

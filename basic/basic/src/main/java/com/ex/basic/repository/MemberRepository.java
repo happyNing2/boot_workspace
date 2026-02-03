@@ -1,5 +1,6 @@
 package com.ex.basic.repository;
 
+import com.ex.basic.dto.LoginDto;
 import com.ex.basic.dto.MemberDto;
 import org.springframework.stereotype.Repository;
 
@@ -56,6 +57,22 @@ public class MemberRepository {
         if (existMem == null) {
             bool = DB.add(memberDto);
             return bool;
+        }
+        return bool;
+    }
+
+    //login
+    public boolean login(LoginDto loginDto) {
+        boolean bool = false;
+        MemberDto existMem = DB.stream()
+                .filter(mem -> mem.getUsername().equals(loginDto.getUsername()))
+                .findFirst()
+                .orElse(null);
+
+        if (existMem != null) {
+            if (existMem.getPassword().equals(loginDto.getPassword())){
+                bool = true;
+            }
         }
         return bool;
     }
