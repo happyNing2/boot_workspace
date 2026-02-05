@@ -120,6 +120,29 @@ public class MemberController {
             summary = "회원 추가",
             description = "회원 추가"
     )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "회원 가입 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = String.class, example = """
+                                    [
+                                        {
+                                            "id" : 1,
+                                            "username" : "aaa",
+                                            "password" : "111",
+                                            "role" : "USER"
+                                        }
+                                    ]
+                                    """)
+                    )
+            ),
+            @ApiResponse(responseCode = "409", description = "회원 가입 실패 : 중복 id",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(value = "중복된 id입니다")
+                    )
+            )
+    })
     public ResponseEntity<Void> addMember(
             @ModelAttribute MemberDto memberDto // form
     ){
