@@ -2,19 +2,13 @@ package com.ex.basic.dto;
 
 import com.ex.basic.entity.MemberEntity;
 import lombok.*;
-import org.springframework.beans.BeanUtils;
 
-@Getter @Setter
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class MemberDto {
-    private long id;
+public class MemberRegDto {
     private String username;
     private String password;
     private String role;
-
-    public MemberDto(MemberEntity memberEntity) {
-        BeanUtils.copyProperties(memberEntity, this);
-    }
 }

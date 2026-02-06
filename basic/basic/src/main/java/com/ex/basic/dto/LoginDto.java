@@ -1,23 +1,18 @@
 package com.ex.basic.dto;
 
+import com.ex.basic.entity.MemberEntity;
+import lombok.*;
+import org.springframework.beans.BeanUtils;
 
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class LoginDto {
     private String username;
     private String password;
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public LoginDto(MemberEntity memberEntity) {
+        BeanUtils.copyProperties(memberEntity, this);
     }
 }

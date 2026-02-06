@@ -21,7 +21,7 @@ public class MemberRepository {
         return DB;
     }
 
-    public MemberDto findById(int id) {
+    public MemberDto findById(long id) {
         MemberDto memDto = DB.stream()
                 .filter(mem -> mem.getId() == id)
                 .findFirst()

@@ -2,6 +2,8 @@ package com.ex.basic.controller;
 
 import com.ex.basic.dto.LoginDto;
 import com.ex.basic.dto.MemberDto;
+import com.ex.basic.dto.MemberRegDto;
+import com.ex.basic.dto.PageDto;
 import com.ex.basic.exception.InvalidLoginException;
 import com.ex.basic.exception.MemberDuplicateException;
 import com.ex.basic.exception.MemberNotFoundException;
@@ -14,6 +16,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +29,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/members")
 public class MemberController {
-    private MemberService memberService;
+    private final MemberService memberService;
     public MemberController(MemberService memberService) {
         this.memberService = memberService;
     }
@@ -50,14 +55,18 @@ public class MemberController {
                     )
             )
     })
-    public ResponseEntity<List<MemberDto>> getList(){
-        List<MemberDto> list = null;
-        try {
-            list = memberService.getList();
-        } catch (MemberNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(list);
-        }
-        return ResponseEntity.ok(list);
+//    public ResponseEntity<List<MemberDto>> getList(
+    public ResponseEntity<PageDto> getList(
+            @RequestParam(name="start", defaultValue = "0") int start
+    ){
+
+//        List<MemberDto> list = null;
+//        try {
+//        list = memberService.getList(start);
+//        } catch (MemberNotFoundException e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(list);
+//        }
+        return ResponseEntity.ok(memberService.getList(start));
     }
 
     @GetMapping("/{id}")
@@ -65,16 +74,39 @@ public class MemberController {
             summary = "특정 회원 조회",
             description = "특정 회원 조회"
     )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "특정 회원 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = String.class, example = """
+                                    [
+                                        {
+                                            "id" : 1,
+                                            "username" : "aaa",
+                                            "password" : "111",
+                                            "role" : "USER"
+                                        }
+                                    ]
+                                    """)
+                    )
+            ),
+            @ApiResponse(responseCode = "404", description = "특정 회원 조회 실패 : 없는 id",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(value = "없는 id입니다")
+                    )
+            )
+    })
     public ResponseEntity<MemberDto> getInfoId(
             @PathVariable("id") int id
     ){
         MemberDto mem = null;
-        try {
-            mem = memberService.getOne(id);
-        }
-        catch (MemberNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mem);
-        }
+//        try {
+        mem = memberService.getOne(id);
+//        }
+//        catch (MemberNotFoundException e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mem);
+//        }
         return ResponseEntity.ok(mem);
     }
 
@@ -83,6 +115,20 @@ public class MemberController {
             summary = "회원 수정",
             description = "회원 수정"
     )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "회원 삭제 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(value = "true")
+                    )
+            ),
+            @ApiResponse(responseCode = "400", description = "회원 삭제 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(value = "false")
+                    )
+            )
+    })
     public ResponseEntity<Void> modifyMemById(
             @PathVariable("id") int id,
             @ModelAttribute MemberDto memberDto //form
@@ -102,6 +148,20 @@ public class MemberController {
             summary = "회원 삭제",
             description = "회원 삭제"
     )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "회원 삭제 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(value = "true")
+                    )
+            ),
+            @ApiResponse(responseCode = "400", description = "회원 삭제 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(value = "false")
+                    )
+            )
+    })
     public ResponseEntity<Void> deleteMemById(
             @PathVariable("id") int id
     ){
@@ -123,7 +183,7 @@ public class MemberController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "회원 가입 성공",
                     content = @Content(
-                            mediaType = "application/json",
+                            mediaType = "application/json", // 폼
                             schema = @Schema(implementation = String.class, example = """
                                     [
                                         {
@@ -144,14 +204,14 @@ public class MemberController {
             )
     })
     public ResponseEntity<Void> addMember(
-            @ModelAttribute MemberDto memberDto // form
+            @ModelAttribute MemberRegDto memberRegDto // form
     ){
-        boolean bool = false;
-        try {
-            bool = memberService.insert(memberDto);
-        } catch(MemberDuplicateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+//        boolean bool = false;
+//        try {
+        memberService.insert(memberRegDto);
+//        } catch(MemberDuplicateException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+//        }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -179,11 +239,11 @@ public class MemberController {
             @RequestBody LoginDto loginDto
     ){
         boolean isLogin = false;
-        try {
-            isLogin = memberService.login(loginDto);
-        } catch (InvalidLoginException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(isLogin);
-        }
+//        try {
+        isLogin = memberService.login(loginDto);
+//        } catch (InvalidLoginException e) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(isLogin);
+//        }
         return ResponseEntity.ok(isLogin);
 
     }
