@@ -16,7 +16,10 @@ public class MemberEntity {
 
     @Column(unique = true, nullable = false, length = 30)
     private String username;
-
+    @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
     private String role;
+
+    private String fileName;
 }

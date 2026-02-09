@@ -1,6 +1,5 @@
 package com.ex.basic.dto;
 
-import com.ex.basic.entity.MemberEntity;
 import lombok.*;
 
 @Setter @Getter
@@ -11,4 +10,5 @@ public class MemberRegDto {
     private String username;
     private String password;
     private String role;
+    private String fileName;
 }

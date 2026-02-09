@@ -14,6 +14,8 @@ public class MemberDto {
     private String password;
     private String role;
 
+    private String fileName;
+
     public MemberDto(MemberEntity memberEntity) {
         BeanUtils.copyProperties(memberEntity, this);
     }

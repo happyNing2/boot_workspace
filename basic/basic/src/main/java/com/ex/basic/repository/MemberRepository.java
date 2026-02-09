@@ -12,9 +12,9 @@ public class MemberRepository {
     private List<MemberDto> DB;
     public MemberRepository() {
         DB = new ArrayList<>();
-        DB.add(new MemberDto(1, "aaa", "aaa", "USER"));
-        DB.add(new MemberDto(2, "bbb", "bbb", "USER"));
-        DB.add(new MemberDto(3, "ccc", "ccc", "USER"));
+        DB.add(new MemberDto(1, "aaa", "aaa", "USER", "nan"));
+        DB.add(new MemberDto(2, "bbb", "bbb", "USER", "nan"));
+        DB.add(new MemberDto(3, "ccc", "ccc", "USER", "nan"));
     }
 
     public List<MemberDto> findAll() {

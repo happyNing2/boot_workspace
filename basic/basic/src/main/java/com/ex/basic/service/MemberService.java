@@ -9,7 +9,6 @@ import com.ex.basic.exception.InvalidLoginException;
 import com.ex.basic.exception.MemberDuplicateException;
 import com.ex.basic.exception.MemberNotFoundException;
 import com.ex.basic.repository.BasicMemberRepository;
-import com.ex.basic.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service // 연산, repository로 연결
 @RequiredArgsConstructor
@@ -29,6 +26,9 @@ import java.util.Optional;
 public class MemberService { // 예외처리도 함
 
     private final BasicMemberRepository basicMemberRepository;
+
+    @Autowired
+    private MemberFileService memberFileService;
 
     @Transactional(readOnly = true)
 //    public List<MemberDto> getList(int start){
@@ -56,11 +56,14 @@ public class MemberService { // 예외처리도 함
                 .orElseThrow(() -> new MemberNotFoundException("해당 사용자 없음"));
     }
 
-    public boolean modify(long id, MemberDto modDto) {
+    public boolean modify(long id, MemberDto modDto, MultipartFile multipartFile) {
         MemberEntity memberEntity = basicMemberRepository.findById(id)
                 .orElseThrow(
                         () -> new MemberNotFoundException("변경할 사용자 없음")
                 );
+        // 수정될 파일 이름
+        String fileName = memberFileService.modifyFile(modDto.getFileName(), multipartFile);
+        modDto.setFileName(fileName);
         BeanUtils.copyProperties(modDto, memberEntity);
         return true;
     }
@@ -72,12 +75,15 @@ public class MemberService { // 예외처리도 함
         return true;
     }
 
-    public void insert(MemberRegDto memberRegDto) {
-//        boolean result = memberRepository.save(memberDto);
+    public void insert(MemberRegDto memberRegDto, MultipartFile multipartFile) {
         boolean result = basicMemberRepository.existsByUsername(memberRegDto.getUsername());
         if (result)
             throw new MemberDuplicateException("insert Faild : Id Already Exist");
+
+        String fileName = memberFileService.saveFile(multipartFile);
         MemberEntity memberEntity = new MemberEntity();
+
+        memberRegDto.setFileName(fileName);
 
         BeanUtils.copyProperties(memberRegDto, memberEntity);
         basicMemberRepository.save(memberEntity);
