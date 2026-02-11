@@ -1,11 +1,10 @@
 package com.ex.basic.service;
 
-import com.ex.basic.dto.LoginDto;
 import com.ex.basic.dto.MemberDto;
 import com.ex.basic.dto.MemberRegDto;
 import com.ex.basic.dto.PageDto;
 import com.ex.basic.entity.MemberEntity;
-import com.ex.basic.exception.InvalidLoginException;
+import com.ex.basic.exception.MemberAccessDeniedException;
 import com.ex.basic.exception.MemberDuplicateException;
 import com.ex.basic.exception.MemberNotFoundException;
 import com.ex.basic.repository.BasicMemberRepository;
@@ -16,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +29,7 @@ public class MemberService { // 예외처리도 함
 
     @Autowired
     private MemberFileService memberFileService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
 //    public List<MemberDto> getList(int start){
@@ -50,27 +51,42 @@ public class MemberService { // 예외처리도 함
         return pageDto;
     }
     @Transactional(readOnly = true)
-    public MemberDto getOne(long id) {
-        return basicMemberRepository.findById(id)
+    public MemberDto getOne(long id, String username) {
+        MemberDto memberDto = basicMemberRepository.findById(id)
                 .map(dto -> new MemberDto(dto))
                 .orElseThrow(() -> new MemberNotFoundException("해당 사용자 없음"));
+
+        if (!memberDto.getUsername().equals(username))
+            throw new MemberAccessDeniedException("조회할 권한이 없습니다.");
+
+        return memberDto;
     }
 
-    public boolean modify(long id, MemberDto modDto, MultipartFile multipartFile) {
+    public boolean modify(long id, MemberDto modDto, MultipartFile multipartFile, String username) {
         MemberEntity memberEntity = basicMemberRepository.findById(id)
                 .orElseThrow(
                         () -> new MemberNotFoundException("변경할 사용자 없음")
                 );
+        if (!memberEntity.getUsername().equals(username)){
+            throw new MemberAccessDeniedException("삭제 권한이 없습니다.");
+        }
+
         // 수정될 파일 이름
-        String fileName = memberFileService.modifyFile(modDto.getFileName(), multipartFile);
-        modDto.setFileName(fileName);
+        if (multipartFile != null){
+            String fileName = memberFileService.modifyFile(modDto.getFileName(), multipartFile);
+            modDto.setFileName(fileName);
+        }
+
         BeanUtils.copyProperties(modDto, memberEntity);
         return true;
     }
 
-    public boolean delMember(long id) {
-        if (!basicMemberRepository.existsById(id))
-            throw new MemberNotFoundException("delete Failed : Id Not Found");
+    public boolean delMember(long id, String username) {
+        MemberEntity memberEntity = basicMemberRepository.findById(id)
+                .orElseThrow(() -> new MemberNotFoundException());
+        if (!memberEntity.getUsername().equals(username)){
+            throw new MemberAccessDeniedException("삭제 권한이 없습니다.");
+        }
         basicMemberRepository.deleteById(id);
         return true;
     }
@@ -81,6 +97,9 @@ public class MemberService { // 예외처리도 함
             throw new MemberDuplicateException("insert Faild : Id Already Exist");
 
         String fileName = memberFileService.saveFile(multipartFile);
+
+        // password > Hash 값으로 바꾸기
+//        memberRegDto.setPassword(passwordEncoder.encode(memberRegDto.getPassword()));
         MemberEntity memberEntity = new MemberEntity();
 
         memberRegDto.setFileName(fileName);
@@ -91,6 +110,7 @@ public class MemberService { // 예외처리도 함
     }
 
     // login
+    /*
     public boolean login(LoginDto loginDto) {
         LoginDto result =
                 basicMemberRepository.findByUsername(loginDto.getUsername())
@@ -101,4 +121,6 @@ public class MemberService { // 예외처리도 함
             throw new InvalidLoginException("Login Failed : password 불일치");
         return true;
     }
+
+     */
 }

@@ -1,10 +1,10 @@
 package com.ex.basic.controller;
 
-import com.ex.basic.dto.LoginDto;
 import com.ex.basic.dto.MemberDto;
 import com.ex.basic.dto.MemberRegDto;
 import com.ex.basic.dto.PageDto;
 import com.ex.basic.exception.MemberNotFoundException;
+import com.ex.basic.repository.BasicMemberRepository;
 import com.ex.basic.service.MemberFileService;
 import com.ex.basic.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,13 +33,16 @@ public class MemberController {
     private final MemberService memberService;
     @Autowired
     private final MemberFileService memberFileService;
+    @Autowired
+    private BasicMemberRepository basicMemberRepository;
 
     public MemberController(MemberService memberService, MemberFileService memberFileService) {
         this.memberService = memberService;
         this.memberFileService = memberFileService;
+        System.out.println("컨트롤러진입");
     }
 
-    @GetMapping("{fileName}/image")
+    @GetMapping("/image/{fileName}")
     @Operation(
             summary = "회원 이미지 조회",
             description = "프로필 이미지 다운로드"
@@ -51,7 +56,8 @@ public class MemberController {
             @ApiResponse(responseCode = "404", description = "이미지 없음")
     })
     public ResponseEntity<byte[]> getMemberImage(
-            @PathVariable("fileName") String fileName
+            @PathVariable("fileName") String fileName,
+            Authentication authentication
     ){
         byte[] imageByte = null;
         imageByte = memberFileService.getImage(fileName);
@@ -85,17 +91,11 @@ public class MemberController {
     public ResponseEntity<PageDto> getList(
             @RequestParam(name="start", defaultValue = "0") int start
     ){
-
-//        List<MemberDto> list = null;
-//        try {
-//        list = memberService.getList(start);
-//        } catch (MemberNotFoundException e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(list);
-//        }
         return ResponseEntity.ok(memberService.getList(start));
     }
 
     @GetMapping("/{id}")
+    @SecurityRequirement(name="JWT")
     @Operation(
             summary = "특정 회원 조회",
             description = "특정 회원 조회"
@@ -104,15 +104,15 @@ public class MemberController {
             @ApiResponse(responseCode = "200", description = "특정 회원 조회 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = String.class, example = """
-                                    [
-                                        {
-                                            "id" : 1,
-                                            "username" : "aaa",
-                                            "password" : "111",
-                                            "role" : "USER"
-                                        }
-                                    ]
+                            schema = @Schema(implementation = MemberDto.class, example = """
+                                    
+                                    {
+                                        "id" : 1,
+                                        "username" : "aaa",
+                                        "password" : "111",
+                                        "role" : "USER"
+                                    }
+                                    
                                     """)
                     )
             ),
@@ -124,19 +124,20 @@ public class MemberController {
             )
     })
     public ResponseEntity<MemberDto> getInfoId(
-            @PathVariable("id") int id
+            @PathVariable("id") int id,
+            Authentication authentication
     ){
+//        System.out.println("특정 회원 조회 id : " + authentication.getName());
+//        System.out.println("특정 회원 인증 정보 : " + authentication.getPrincipal());
         MemberDto mem = null;
-//        try {
-        mem = memberService.getOne(id);
-//        }
-//        catch (MemberNotFoundException e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mem);
-//        }
+
+        mem = memberService.getOne(id, authentication.getName());
+
         return ResponseEntity.ok(mem);
     }
 
     @PutMapping(value="/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @SecurityRequirement(name="JWT")
     @Operation(
             summary = "회원 수정",
             description = "회원 수정"
@@ -159,11 +160,12 @@ public class MemberController {
             @RequestParam(value = "file", required = false) MultipartFile multipartFile,
             @PathVariable("id") int id,
             @ParameterObject
-            @ModelAttribute MemberDto memberDto //form
+            @ModelAttribute MemberDto memberDto, //form
+            Authentication authentication
     ) {
         boolean mod_suc = false;
         try {
-            mod_suc = memberService.modify(id, memberDto, multipartFile);
+            mod_suc = memberService.modify(id, memberDto, multipartFile, authentication.getName());
 
         }
         catch (MemberNotFoundException e) {
@@ -173,6 +175,7 @@ public class MemberController {
     }
 
     @DeleteMapping("/{id}")
+    @SecurityRequirement(name="JWT")
     @Operation(
             summary = "회원 삭제",
             description = "회원 삭제"
@@ -193,11 +196,12 @@ public class MemberController {
     })
     public ResponseEntity<Void> deleteMemById(
             @PathVariable("id") int id,
-            @RequestBody String fileName
+            @RequestBody String fileName,
+            Authentication authentication
     ){
         boolean bool = false;
         try {
-            bool = memberService.delMember(id);
+            bool = memberService.delMember(id, authentication.getName());
             memberFileService.deleteFile(fileName);
         } catch (MemberNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -246,6 +250,7 @@ public class MemberController {
     }
 
     // 로그인
+    /*
     @PostMapping("login")
     @Operation(
             summary = "로그인 기능",
@@ -277,4 +282,6 @@ public class MemberController {
         return ResponseEntity.ok(isLogin);
 
     }
+
+     */
 }
