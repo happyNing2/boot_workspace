@@ -51,17 +51,19 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> login(
             @RequestBody LoginDto loginDto
             ){
-
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(
                         loginDto.getUsername(),
                         loginDto.getPassword()
                 ); // 토큰화
+
         // 자동 인증
         Authentication authentication = authenticationManager.authenticate(token);
         UserDetails userDetails = (UserDetails)authentication.getPrincipal();
+        System.out.println(userDetails);
         // 인증 성공 시 토큰 발급
-        String resultToken = jwtUtil.generateToken(userDetails.getUsername());
+        String role = userDetails.getAuthorities().iterator().next().getAuthority();
+        String resultToken = jwtUtil.generateToken(userDetails.getUsername(), role);
 
         return ResponseEntity.ok(Collections.singletonMap("token", resultToken));
     }

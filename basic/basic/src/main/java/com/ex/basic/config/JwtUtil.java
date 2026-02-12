@@ -15,10 +15,11 @@ public class JwtUtil {
     private final long expirationMs = 1000 * 60 * 10;
 
     // 토큰 생성
-    public String generateToken(String username) {
+    public String generateToken(String username, String role) {
         System.out.println("secretKey : " + secretKey);
         Claims claims = Jwts.claims();
         claims.put("username", username);
+        claims.put("role", role);
 
         return Jwts.builder()
                 .setClaims(claims)

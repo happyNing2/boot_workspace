@@ -76,7 +76,8 @@ public class MemberService { // 예외처리도 함
             String fileName = memberFileService.modifyFile(modDto.getFileName(), multipartFile);
             modDto.setFileName(fileName);
         }
-
+        // password > Hash 값으로 바꾸기
+        modDto.setPassword(passwordEncoder.encode(modDto.getPassword()));
         BeanUtils.copyProperties(modDto, memberEntity);
         return true;
     }
@@ -99,7 +100,7 @@ public class MemberService { // 예외처리도 함
         String fileName = memberFileService.saveFile(multipartFile);
 
         // password > Hash 값으로 바꾸기
-//        memberRegDto.setPassword(passwordEncoder.encode(memberRegDto.getPassword()));
+        memberRegDto.setPassword(passwordEncoder.encode(memberRegDto.getPassword()));
         MemberEntity memberEntity = new MemberEntity();
 
         memberRegDto.setFileName(fileName);
