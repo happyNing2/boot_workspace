@@ -99,8 +99,15 @@ public class MemberService {
 
     @Transactional // 데이터 변화 감지
     public void delete(long id) {
-        if (!memberRepository.existsById(id))
-            throw new MemberNotFoundException("삭제할 사용자 없음");
+//        if (!memberRepository.existsById(id))
+//            throw new MemberNotFoundException("삭제할 사용자 없음");
+        MemberEntity memberEntity = memberRepository.findById(id)
+                        .orElseThrow(
+                                ()->new MemberNotFoundException("삭제할 사용자가 없습니다")
+                        );
+//        memberEntity.getPosts().forEach(
+//                post -> post.setMemberEntity(null)); // memberEntity null로 설정
+        memberEntity.getPosts().clear(); // 자식도 같이 삭제됨
         memberRepository.deleteById(id);
     }
 

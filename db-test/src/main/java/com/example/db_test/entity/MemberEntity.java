@@ -3,6 +3,9 @@ package com.example.db_test.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Setter @Getter
 @NoArgsConstructor
@@ -19,4 +22,11 @@ public class MemberEntity { //primary key 필수
 
     private String userName;
     private int age;
+
+    @OneToMany(mappedBy = "memberEntity", fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL, orphanRemoval = true) // 한 명은 여러 개의 글을 작성할 수 있다.
+    // orphanRemoval = true : 자식도 같이 삭제 됨
+    // casecade = CasecadeType.ALL : 자식도 같이 삭제 됨,
+    private List<PostEntity> posts = new ArrayList<>();
+
 }
