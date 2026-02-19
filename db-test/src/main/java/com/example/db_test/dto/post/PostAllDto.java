@@ -1,7 +1,6 @@
 package com.example.db_test.dto.post;
 
-import com.example.db_test.entity.MemberEntity;
-import com.example.db_test.entity.PostEntity;
+import com.example.db_test.entity.post.PostEntity;
 import lombok.*;
 import org.springframework.beans.BeanUtils;
 

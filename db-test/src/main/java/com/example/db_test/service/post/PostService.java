@@ -4,9 +4,11 @@ import com.example.db_test.dto.post.PostAllDto;
 import com.example.db_test.dto.post.PostDetailDto;
 import com.example.db_test.dto.post.PostDto;
 import com.example.db_test.entity.MemberEntity;
-import com.example.db_test.entity.PostEntity;
+import com.example.db_test.entity.post.PostCountEntity;
+import com.example.db_test.entity.post.PostEntity;
 import com.example.db_test.exception.post.MemberNotFoundException;
 import com.example.db_test.repository.MemberRepository;
+import com.example.db_test.repository.post.PostCountRepository;
 import com.example.db_test.repository.post.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -19,6 +21,8 @@ import java.util.List;
 public class PostService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final PostCountRepository postCountRepository;
+
     public void insert(PostDto postDto) {
         MemberEntity memberEntity = memberRepository.findById(postDto.getNumber())
                 .orElseThrow( () -> new MemberNotFoundException("회원 없음"));
@@ -42,11 +46,32 @@ public class PostService {
                 .map(PostAllDto :: new).toList(); // member 정보까지 join돼서 나옴
     }
 
-    public PostDetailDto getPostOne(Long id) {
-        return postRepository.findById(id)
+    public PostDetailDto getPostOne(Long id, Long number) {
+        PostDetailDto postDetailDto = postRepository.findById(id)
                 .map(PostDetailDto::new)
                 .orElseThrow(
                         () -> new MemberNotFoundException("포스트 없음") // PostNotFoundException 으로 나중에 바꿔주기 아무튼 관련 익셉션
                 );
+        increaseView(id, number);
+
+        postDetailDto.setPostCount(postCountRepository.countByPostEntity_Id(id));
+        return postDetailDto;
     }
+
+    private void increaseView(Long id, Long number) {
+        if (!postCountRepository.existsByMemberEntity_NumberAndPostEntity_Id(number, id)){
+
+            MemberEntity memberEntity = memberRepository.getReferenceById(number);
+            PostEntity postEntity = postRepository.getReferenceById(id);
+            /* 데이터 베이스 참조해야 함
+            MemberEntity memberEntity = memberRepository.findById(number).orElseThrow();
+            PostEntity postEntity = postRepository.findById(id).orElseThrow();
+            */
+            PostCountEntity postCountEntity = new PostCountEntity(memberEntity, postEntity);
+
+            postCountRepository.save(postCountEntity);
+        }
+    }
+
+
 }

@@ -1,5 +1,6 @@
-package com.example.db_test.entity;
+package com.example.db_test.entity.post;
 
+import com.example.db_test.entity.MemberEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

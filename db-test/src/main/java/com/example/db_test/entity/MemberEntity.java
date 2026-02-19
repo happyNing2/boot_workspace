@@ -1,5 +1,6 @@
 package com.example.db_test.entity;
 
+import com.example.db_test.entity.post.PostEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
