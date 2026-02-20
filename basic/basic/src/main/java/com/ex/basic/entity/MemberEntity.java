@@ -1,7 +1,11 @@
 package com.ex.basic.entity;
 
+import com.ex.basic.entity.post.PostEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Setter @Getter
@@ -22,4 +26,9 @@ public class MemberEntity {
     private String role;
 
     private String fileName;
+
+    @OneToMany(mappedBy = "memberEntity", fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL, orphanRemoval = true
+    )
+    private List<PostEntity> posts = new ArrayList<>();
 }

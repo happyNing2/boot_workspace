@@ -2,6 +2,7 @@ package com.ex.basic.repository;
 
 import com.ex.basic.dto.LoginDto;
 import com.ex.basic.dto.MemberDto;
+import com.ex.basic.entity.MemberEntity;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -10,12 +11,14 @@ import java.util.List;
 @Repository // database 처리
 public class MemberRepository {
     private List<MemberDto> DB;
+    /*
     public MemberRepository() {
         DB = new ArrayList<>();
         DB.add(new MemberDto(1, "aaa", "aaa", "USER", "nan"));
         DB.add(new MemberDto(2, "bbb", "bbb", "USER", "nan"));
         DB.add(new MemberDto(3, "ccc", "ccc", "USER", "nan"));
     }
+     */
 
     public List<MemberDto> findAll() {
         return DB;

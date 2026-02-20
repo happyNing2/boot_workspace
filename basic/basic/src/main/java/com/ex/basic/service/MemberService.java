@@ -107,21 +107,5 @@ public class MemberService { // 예외처리도 함
 
         BeanUtils.copyProperties(memberRegDto, memberEntity);
         basicMemberRepository.save(memberEntity);
-//        return result;
     }
-
-    // login
-    /*
-    public boolean login(LoginDto loginDto) {
-        LoginDto result =
-                basicMemberRepository.findByUsername(loginDto.getUsername())
-                        .map(dto -> new LoginDto(dto))
-                        .orElseThrow(() -> new InvalidLoginException("Login Failed : username이 없음"));
-
-        if (!loginDto.getPassword().equals(result.getPassword()))
-            throw new InvalidLoginException("Login Failed : password 불일치");
-        return true;
-    }
-
-     */
 }

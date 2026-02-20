@@ -12,7 +12,7 @@ import java.util.Date;
 public class JwtUtil {
     @Value("test1234")
     private String secretKey;
-    private final long expirationMs = 1000 * 60 * 10;
+    private final long expirationMs = 1000 * 60 * 60;
 
     // 토큰 생성
     public String generateToken(String username, String role) {
