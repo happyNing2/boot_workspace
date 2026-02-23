@@ -33,5 +33,29 @@ public class GlobalPostExceptionHandler {
                 problemDetail // front에서 변수.json()으로 받아올 수 있음
         );
     }
+
+    @ExceptionHandler(PostNotFoundException.class)
+    public ResponseEntity<ProblemDetail> postNotFoundHandler(
+            PostNotFoundException postNotFoundException
+    ) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        problemDetail.setTitle("포스트를 찾을 수 없습니다");
+        problemDetail.setDetail(postNotFoundException.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                problemDetail // front에서 변수.json()으로 받아올 수 있음
+        );
+    }
+
+    @ExceptionHandler(PostMemberAccessDeniedException.class)
+    public ResponseEntity<ProblemDetail> postMemberAccessDeniedHandler(
+            PostMemberAccessDeniedException postMemberAccessDeniedException
+    ){
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
+        problemDetail.setTitle("권한이 없습니다");
+        problemDetail.setDetail(postMemberAccessDeniedException.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                problemDetail
+        );
+    }
 }
 

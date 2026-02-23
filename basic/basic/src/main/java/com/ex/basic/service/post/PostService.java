@@ -3,10 +3,13 @@ package com.ex.basic.service.post;
 import com.ex.basic.dto.post.PostAllDto;
 import com.ex.basic.dto.post.PostDetailDto;
 import com.ex.basic.dto.post.PostDto;
+import com.ex.basic.dto.post.PostModifyDto;
 import com.ex.basic.entity.MemberEntity;
 import com.ex.basic.entity.post.PostCountEntity;
 import com.ex.basic.entity.post.PostEntity;
 import com.ex.basic.exception.post.MemberNotFoundException;
+import com.ex.basic.exception.post.PostMemberAccessDeniedException;
+import com.ex.basic.exception.post.PostNotFoundException;
 import com.ex.basic.repository.BasicMemberRepository;
 import com.ex.basic.repository.post.PostCountRepository;
 import com.ex.basic.repository.post.PostRepository;
@@ -46,7 +49,7 @@ public class PostService {
         PostDetailDto postDetailDto = postRepository.findById(number)
                 .map(PostDetailDto::new)
                 .orElseThrow(
-                        () -> new MemberNotFoundException("포스트 없음")
+                        () -> new PostNotFoundException("포스트 없음")
                 );
         increaseView(username, number);
         postDetailDto.setPostCount(postCountRepository.countByPostEntity_Number(number));
@@ -62,5 +65,24 @@ public class PostService {
             PostCountEntity postCountEntity = new PostCountEntity(memberEntity, postEntity);
             postCountRepository.save(postCountEntity);
         }
+    }
+
+    public void postDelete(Long number,String username) {
+        PostEntity postEntity = postRepository.findById(number)
+                        .orElseThrow(() -> new PostNotFoundException());
+        if (!postEntity.getMemberEntity().getUsername().equals(username))
+            throw new PostMemberAccessDeniedException("삭제 권한이 없습니다");
+
+        postRepository.deleteById(number);
+    }
+
+    public void postUpdate(Long number, PostModifyDto postModifyDto, String username){
+        PostEntity postEntity = postRepository.findById(number)
+                .orElseThrow(() -> new PostNotFoundException("게시글 없음"));
+        if (!postEntity.getMemberEntity().getUsername().equals(username))
+            throw new PostMemberAccessDeniedException("수정 권한이 없습니다");
+
+        BeanUtils.copyProperties(postModifyDto, postEntity);
+        postRepository.save(postEntity);
     }
 }

@@ -3,6 +3,7 @@ package com.ex.basic.controller.post;
 import com.ex.basic.dto.post.PostAllDto;
 import com.ex.basic.dto.post.PostDetailDto;
 import com.ex.basic.dto.post.PostDto;
+import com.ex.basic.dto.post.PostModifyDto;
 import com.ex.basic.service.post.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -31,6 +32,13 @@ public class PostController {
             Authentication authentication
             ){
         postService.insert(postDto, authentication.getName());
+        /*
+        Map<String, Object> map = new HashMap<>();
+        map.put("status", "SUCCESS");
+        map.put("message", "데이터 추가 성공");
+
+        return ResponseEntity.ok(map);
+         */
         return ResponseEntity.ok("데이터 추가");
     }
 
@@ -45,5 +53,26 @@ public class PostController {
             @RequestParam("username") String username
     ){
         return ResponseEntity.ok(postService.getPostOne(username, number));
+    }
+
+    @DeleteMapping("{number}")
+    @SecurityRequirement(name="JWT")
+    public ResponseEntity<Void> postDelete(
+            @PathVariable("number") Long number,
+            Authentication authentication
+    ){
+        postService.postDelete(number, authentication.getName());
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("{number}")
+    @SecurityRequirement(name = "JWT")
+    public ResponseEntity<Void> postUpdate(
+            @PathVariable("number") Long number,
+            @ParameterObject @ModelAttribute PostModifyDto postModifyDto,
+            Authentication authentication
+            ){
+        postService.postUpdate(number, postModifyDto, authentication.getName());
+        return ResponseEntity.ok().build();
     }
 }
