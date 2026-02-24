@@ -88,6 +88,7 @@ public class MemberService { // 예외처리도 함
         if (!memberEntity.getUsername().equals(username)){
             throw new MemberAccessDeniedException("삭제 권한이 없습니다.");
         }
+        memberEntity.getPostLikes().clear();
         basicMemberRepository.deleteById(id);
         return true;
     }

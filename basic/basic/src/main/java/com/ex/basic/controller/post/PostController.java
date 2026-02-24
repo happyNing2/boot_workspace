@@ -1,5 +1,6 @@
 package com.ex.basic.controller.post;
 
+import com.ex.basic.config.security.CustomUserDetails;
 import com.ex.basic.dto.post.PostAllDto;
 import com.ex.basic.dto.post.PostDetailDto;
 import com.ex.basic.dto.post.PostDto;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,16 +45,27 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PostAllDto>> getPost(){
-        return ResponseEntity.ok(postService.getPost());
+    @SecurityRequirement(name = "JWT") // permit all도 받고, auth도 받을 수 있음
+    public ResponseEntity<List<PostAllDto>> getPost(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
+        long userId = 0;
+        if (customUserDetails != null)
+            userId = customUserDetails.getId();
+        return ResponseEntity.ok(postService.getPost(userId));
     }
 
     @GetMapping("{number}")
+    @SecurityRequirement(name = "JWT")
     public ResponseEntity<PostDetailDto> getPostOne(
             @PathVariable("number") Long number,
-            @RequestParam("username") String username
+            Authentication authentication
+//            @RequestParam("username") String username
     ){
-        return ResponseEntity.ok(postService.getPostOne(username, number));
+        CustomUserDetails userDetails = (CustomUserDetails)authentication.getPrincipal();
+        return ResponseEntity.ok(postService.getPostOne(userDetails.getId(), number));
+
+//        return ResponseEntity.ok(postService.getPostOne(username, number));
     }
 
     @DeleteMapping("{number}")

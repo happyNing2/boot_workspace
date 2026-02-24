@@ -10,18 +10,18 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="post_count",
+@Table(name="post_like",
         uniqueConstraints = {@UniqueConstraint(columnNames = {"member_id", "post_id"})}
 )
 @Getter @Setter
 @NoArgsConstructor
-public class PostCountEntity {
+public class PostLikeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = true,
+    @JoinColumn(name = "member_id", nullable = false,
             foreignKey = @ForeignKey(
                     foreignKeyDefinition = "FOREIGN KEY(member_id) REFERENCES basic_entity(id) ON DELETE SET NULL"
             )
@@ -46,7 +46,7 @@ public class PostCountEntity {
         this.createAt = LocalDateTime.now();
     }
 
-    public PostCountEntity(MemberEntity memberEntity, PostEntity postEntity){
+    public PostLikeEntity(MemberEntity memberEntity, PostEntity postEntity){
         this.memberEntity = memberEntity;
         this.postEntity = postEntity;
     }

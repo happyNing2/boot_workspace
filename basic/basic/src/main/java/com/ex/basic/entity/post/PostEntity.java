@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="basic_post")
@@ -29,6 +31,14 @@ public class PostEntity {
     private String content;
     private LocalDateTime createAt;
     private LocalDateTime updateTime;
+
+    @OneToMany(mappedBy = "postEntity", orphanRemoval = true,
+            cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PostCountEntity> postCounts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "postEntity", orphanRemoval = true,
+    cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PostLikeEntity> postLikes = new ArrayList<>();
 
     @PrePersist
     public void onCreate(){

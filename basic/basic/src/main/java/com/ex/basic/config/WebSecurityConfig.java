@@ -37,6 +37,8 @@ public class WebSecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/members/image/**").permitAll() // 이미지
                                 .requestMatchers(HttpMethod.GET, "/post").permitAll() // 게시글 조회
                                 .requestMatchers(HttpMethod.GET, "/post/*").permitAll() // 특정 회원 글 조회
+                                .requestMatchers(HttpMethod.POST, "/post/{postId}/like").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "/post/{postId}/like").permitAll()
                                 .anyRequest().authenticated()
 
                 )

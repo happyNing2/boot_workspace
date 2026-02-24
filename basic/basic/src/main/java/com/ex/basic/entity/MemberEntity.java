@@ -1,6 +1,7 @@
 package com.ex.basic.entity;
 
 import com.ex.basic.entity.post.PostEntity;
+import com.ex.basic.entity.post.PostLikeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,4 +32,8 @@ public class MemberEntity {
             cascade = CascadeType.ALL, orphanRemoval = true
     )
     private List<PostEntity> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "memberEntity", orphanRemoval = true,
+            cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PostLikeEntity> postLikes = new ArrayList<>();
 }
