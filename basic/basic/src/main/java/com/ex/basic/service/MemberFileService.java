@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Service
 public class MemberFileService {
-    private static final String DIR = "uploads/";
+    private static final String DIR = "/app/uploads/";
     public String saveFile(MultipartFile multipartFile){
         String fileName = null;
         if(multipartFile == null || multipartFile.isEmpty())

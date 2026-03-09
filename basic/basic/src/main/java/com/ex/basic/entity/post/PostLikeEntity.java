@@ -23,7 +23,7 @@ public class PostLikeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false,
             foreignKey = @ForeignKey(
-                    foreignKeyDefinition = "FOREIGN KEY(member_id) REFERENCES basic_entity(id) ON DELETE SET NULL"
+                    foreignKeyDefinition = "FOREIGN KEY(member_id) REFERENCES basic_entity(id) ON DELETE CASCADE"
             )
     )
     @JsonIgnore
@@ -32,7 +32,7 @@ public class PostLikeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false,
             foreignKey = @ForeignKey(
-                    foreignKeyDefinition = "FOREIGN KEY(post_id) REFERENCES basic_post(number) ON DELETE SET CASCADE"
+                    foreignKeyDefinition = "FOREIGN KEY(post_id) REFERENCES basic_post(number) ON DELETE CASCADE"
             )
     )
     @JsonIgnore

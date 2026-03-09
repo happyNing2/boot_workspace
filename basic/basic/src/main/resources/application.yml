@@ -1,2 +1,10 @@
 jwt:
   secretKey: test1234
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:12345/jpa
+#    url: jdbc:mysql://mysql-test:12345/jpa
+    username: root
+    password: 1234
